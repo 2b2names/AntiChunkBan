@@ -9,16 +9,17 @@ public class AntiChunkBan extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        getLogger().info("AntiChunkBan has been enabled!");
-        getServer().getPluginManager().registerEvents(new ChunkListener(this), this);
+        getLogger().info("AntiChunkBan enabled!");
 
-        // Load config or create default
         saveDefaultConfig();
+
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new ChunkListener(this), this);
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("AntiChunkBan has been disabled!");
+        getLogger().info("AntiChunkBan disabled!");
     }
 
     public static AntiChunkBan getInstance() {

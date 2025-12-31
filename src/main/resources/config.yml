@@ -1,4 +1,5 @@
 chunk:
   max-tile-entities: 200
+  max-command-blocks: 50
   alert-console: true
   alert-staff: true
