@@ -1,0 +1,10 @@
+name: AntiChunkBan
+main: me.tiger.antiChunkBan.AntiChunkBan
+version: 1.0
+api-version: 1.21
+author: 2b2t_names
+description: Protects servers from malicious chunk exploits.
+commands:
+  acbstatus:
+    description: Check AntiChunkBan status
+    usage: /acbstatus
