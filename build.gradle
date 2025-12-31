@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'me.tiger'
-version = '1.1-TEST'
+version = '1.1'
 
 repositories {
     mavenCentral()

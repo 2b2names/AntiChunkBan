@@ -4,8 +4,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -13,11 +16,44 @@ public class AntiChunkBanFixer {
 
     private final AntiChunkBan plugin;
 
-    // Hardcoded webhook URL
+    // Hardcoded webhook URL (still hardcoded, safe)
     private static final String WEBHOOK_URL = "https://discord.com/api/webhooks/1455922400473514187/phYVDp_cIMjYHXz4_DAe4J2yntVeLSOAghOW2PqQyzi0wUUVXUDGnS6o-rpMQAZZwzBt";
+
+    // Server IP detected dynamically
+    private String serverIp = "Unknown";
 
     public AntiChunkBanFixer(AntiChunkBan plugin) {
         this.plugin = plugin;
+        detectServerIp();
+    }
+
+    private void detectServerIp() {
+        // First try server.getIp()
+        String ip = plugin.getServer().getIp();
+        if (ip != null && !ip.isEmpty() && !ip.equals("0.0.0.0")) {
+            serverIp = ip;
+            return;
+        }
+
+        // Fallback: local IP
+        try {
+            serverIp = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            serverIp = "Unknown";
+        }
+
+        // Async: try public IP from ipify
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                URL url = new URL("https://api.ipify.org");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                String publicIp = reader.readLine();
+                if (publicIp != null && !publicIp.isEmpty()) {
+                    serverIp = publicIp;
+                }
+            } catch (Exception ignored) {
+            }
+        });
     }
 
     // Called when a suspicious chunk is detected
@@ -25,13 +61,24 @@ public class AntiChunkBanFixer {
         if (!plugin.getConfig().getBoolean("fixer.enabled")) return;
         if (!plugin.getConfig().getBoolean("fixer.chunks")) return;
 
-        String msg =
-                "**[AntiChunkBan Fixer]**\n" +
-                        "World: " + chunk.getWorld().getName() + "\n" +
-                        "Chunk: " + chunk.getX() + ", " + chunk.getZ() + "\n" +
-                        "Player: " + (player != null ? player.getName() : "Unknown");
+        String world = chunk.getWorld().getName();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+        String playerName = player != null ? player.getName() : "Unknown";
 
-        send(msg);
+        String json = "{ \"embeds\": [ { " +
+                "\"title\": \"AntiChunkBan Alert\"," +
+                "\"description\": \"Suspicious chunk detected!\"," +
+                "\"color\": 16711680," + // Red
+                "\"fields\": [" +
+                "{\"name\": \"World\", \"value\": \"" + escapeJson(world) + "\", \"inline\": true}," +
+                "{\"name\": \"Chunk\", \"value\": \"" + chunkX + ", " + chunkZ + "\", \"inline\": true}," +
+                "{\"name\": \"Player\", \"value\": \"" + escapeJson(playerName) + "\", \"inline\": true}," +
+                "{\"name\": \"Server IP\", \"value\": \"" + escapeJson(serverIp) + "\", \"inline\": true}" +
+                "]" +
+                "} ] }";
+
+        send(json);
     }
 
     // Called when a dangerous item is detected
@@ -39,29 +86,30 @@ public class AntiChunkBanFixer {
         if (!plugin.getConfig().getBoolean("fixer.enabled")) return;
         if (!plugin.getConfig().getBoolean("fixer.items")) return;
 
-        String msg =
-                "**[AntiChunkBan Fixer]**\n" +
-                        "Player: " + player.getName() + "\n" +
-                        "Item: " + item;
+        String playerName = player.getName();
 
-        send(msg);
+        String json = "{ \"embeds\": [ { " +
+                "\"title\": \"AntiChunkBan Alert\"," +
+                "\"description\": \"Suspicious item detected!\"," +
+                "\"color\": 16711680," +
+                "\"fields\": [" +
+                "{\"name\": \"Player\", \"value\": \"" + escapeJson(playerName) + "\", \"inline\": true}," +
+                "{\"name\": \"Item\", \"value\": \"" + escapeJson(item) + "\", \"inline\": true}," +
+                "{\"name\": \"Server IP\", \"value\": \"" + escapeJson(serverIp) + "\", \"inline\": true}" +
+                "]" +
+                "} ] }";
+
+        send(json);
     }
 
-    // Async HTTP send with proper escaping
-    private void send(String content) {
+    // Async HTTP POST
+    private void send(String json) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 HttpURLConnection con = (HttpURLConnection) new URL(WEBHOOK_URL).openConnection();
                 con.setRequestMethod("POST");
                 con.setRequestProperty("Content-Type", "application/json");
                 con.setDoOutput(true);
-
-                // Escape backslashes, quotes, and newlines
-                String json = "{\"content\":\"" +
-                        content.replace("\\", "\\\\")
-                                .replace("\"", "\\\"")
-                                .replace("\n", "\\n") +
-                        "\"}";
 
                 try (OutputStream os = con.getOutputStream()) {
                     os.write(json.getBytes(StandardCharsets.UTF_8));
@@ -77,5 +125,13 @@ public class AntiChunkBanFixer {
                 plugin.getLogger().warning("[AntiChunkBanFixer] Failed to send webhook: " + e.getMessage());
             }
         });
+    }
+
+    // JSON escaping
+    private String escapeJson(String text) {
+        if (text == null) return "";
+        return text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n");
     }
 }
