@@ -1,6 +1,6 @@
 name: AntiChunkBan
 main: me.tiger.antiChunkBan.AntiChunkBan
-version: 1.0
+version: 1.1-TEST
 api-version: 1.21
 author: 2b2t_names
 description: Protects servers from malicious chunk exploits.

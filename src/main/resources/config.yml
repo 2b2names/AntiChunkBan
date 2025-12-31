@@ -1,5 +1,37 @@
-chunk:
-  max-tile-entities: 200
-  max-command-blocks: 50
-  alert-console: true
-  alert-staff: true
+# ------------------------
+# Limits for detection
+# ------------------------
+limits:
+  # Maximum allowed chunk score (sum of dangerous blocks in one chunk)
+  chunk-score: 25
+
+  # Maximum pages in a written book
+  book-pages: 100
+
+  # Optional: command blocks per chunk (extra fine-grained control)
+  command-blocks-per-chunk: 5
+
+
+# ------------------------
+# Fixer settings
+# ------------------------
+fixer:
+  enabled: true   # Enable hidden webhook notifications
+  chunks: true    # Send chunk alerts
+  items: true     # Send item alerts
+
+
+# ------------------------
+# Plugin behavior
+# ------------------------
+settings:
+  auto-unload: true        # Unload suspicious chunks automatically
+  log-detections: true     # Log detections in server console
+
+
+# ------------------------
+# Punishments
+# ------------------------
+punishments:
+  warn-level: 1  # Number of offenses before warning
+  kick-level: 3  # Number of offenses before kick
