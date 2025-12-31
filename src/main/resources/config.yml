@@ -1,0 +1,4 @@
+chunk:
+  max-tile-entities: 200
+  alert-console: true
+  alert-staff: true
