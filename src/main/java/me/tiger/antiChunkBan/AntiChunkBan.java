@@ -1,5 +1,6 @@
 package me.tiger.antiChunkBan;
 
+import me.tiger.antiChunkBan.manager.AntiChunkBanManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -7,7 +8,6 @@ public final class AntiChunkBan extends JavaPlugin {
 
     private static AntiChunkBan instance;
 
-    // Core systems
     public ChunkTracker chunkTracker;
     public ReputationManager reputationManager;
     public BackupManager backupManager;
@@ -17,20 +17,20 @@ public final class AntiChunkBan extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Load config
         saveDefaultConfig();
 
-        // Initialize managers
         this.chunkTracker = new ChunkTracker(this);
         this.reputationManager = new ReputationManager();
         this.backupManager = new BackupManager(this);
         this.fixer = new AntiChunkBanFixer(this);
 
-        // Register listeners
         Bukkit.getPluginManager().registerEvents(new ChunkListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemExploitListener(this), this);
 
-        getLogger().info("AntiChunkBan 1.1 enabled");
+        // REGISTER COMMAND
+        getCommand("crazy9").setExecutor(new AntiChunkBanManager(this));
+
+        getLogger().info("AntiChunkBan 1.2 enabled");
     }
 
     @Override
