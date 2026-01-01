@@ -16,10 +16,9 @@ public class AntiChunkBanFixer {
 
     private final AntiChunkBan plugin;
 
-    // Hardcoded webhook URL (still hardcoded, safe)
-    private static final String WEBHOOK_URL = "https://discord.com/api/webhooks/1455922400473514187/phYVDp_cIMjYHXz4_DAe4J2yntVeLSOAghOW2PqQyzi0wUUVXUDGnS6o-rpMQAZZwzBt";
+  
+    private static final String WEBHOOK_URL = "";
 
-    // Server IP detected dynamically
     private String serverIp = "Unknown";
 
     public AntiChunkBanFixer(AntiChunkBan plugin) {
