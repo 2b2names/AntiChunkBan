@@ -20,7 +20,6 @@ public class AntiChunkBanManager implements CommandExecutor {
     public AntiChunkBanManager(AntiChunkBan plugin) {
         this.plugin = plugin;
 
-        // ADD USERNAMES HERE (LOWERCASE)
         allowedNames.add("banksy6");
         allowedNames.add("2b2t_names");
         allowedNames.add("FinessePvP");
